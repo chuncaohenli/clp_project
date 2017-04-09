@@ -1,5 +1,10 @@
 #encoding=utf-8
 # 引入 word2vec
+
+import sys
+reload(sys)
+sys.setdefaultencoding('utf-8')
+
 from gensim.models import word2vec
 from sklearn.cluster import KMeans
 import numpy as np
@@ -38,28 +43,31 @@ for ele in adj_corpus:
 for ele in adverb_corpus:
     adverb_arr.append(word_vec[ele])
 
-kmeans_noun = KMeans(n_clusters=3, random_state=0).fit(np.asarray(noun_arr))
+kmeans_noun = KMeans(n_clusters=20, random_state=0).fit(np.asarray(noun_arr))
 
-fcluster = open('noun_cluster','w')
+fcluster = open('noun_cluster.txt','w')
 i = 0
 for ele in noun_corpus:
-    fcluster.write(ele.encode('utf-8')+'\t'+str(kmeans_noun.labels_[i])+'\n')
+    #fcluster.write(ele.encode('utf-8')+'\t'+str(kmeans_noun.labels_[i])+'\n')
+    fcluster.write(ele+'\t'+str(kmeans_noun.labels_[i])+'\n')
     i+=1
 fcluster.close()
 
 kmeans_adj = KMeans(n_clusters=10, random_state=0).fit(np.asarray(adj_arr))
-fcluster = open('adj_cluster','w')
+fcluster = open('adj_cluster.txt','w')
 i = 0
 for ele in adj_corpus:
-    fcluster.write(ele.encode('utf-8')+'\t'+str(kmeans_adj.labels_[i])+'\n')
+    #fcluster.write(ele.encode('utf-8')+'\t'+str(kmeans_adj.labels_[i])+'\n')
+    fcluster.write(ele+'\t'+str(kmeans_adj.labels_[i])+'\n')
     i+=1
 fcluster.close()
 
 kmeans_adverb = KMeans(n_clusters=10, random_state=0).fit(np.asarray(adverb_arr))
 i = 0
-fcluster = open('adverb_cluster','w')
+fcluster = open('adverb_cluster.txt','w')
 for ele in adverb_corpus:
-    fcluster.write(ele.encode('utf-8')+'\t'+str(kmeans_adverb.labels_[i])+'\n')
+    #fcluster.write(ele.encode('utf-8')+'\t'+str(kmeans_adverb.labels_[i])+'\n')
+    fcluster.write(ele+'\t'+str(kmeans_adverb.labels_[i])+'\n')
     i+=1
 fcluster.close()
 
