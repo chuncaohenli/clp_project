@@ -13,7 +13,7 @@ sys.path = [os.path.join(ROOTDIR, "lib")] + sys.path
 
 # Set your own model path
 MODELDIR=os.path.join(ROOTDIR, "ltp_data")
-
+output = open('output.txt','w')
 
 
 # read json file
@@ -68,6 +68,10 @@ postagger = Postagger() # 初始化实例
 postagger.load(os.path.join(MODELDIR, "pos.model"))
 parser = Parser()
 parser.load(os.path.join(MODELDIR, "parser.model"))
+
+s_gxx = []
+corpus_gxx = {}
+
 for each in comments:
     # paragraph = each.content.encode('raw_unicode_escape')
     paragraph =  each.content.encode('UTF-8')
@@ -76,12 +80,22 @@ for each in comments:
     for sentence in sentences:
         words = segmentor.segment(sentence)
         # print "\t".join(words)
-
+        tmp = []
+        for w in words:
+            tmp.append(w)
+        s_gxx.append(tmp)
         postags = postagger.postag(words)  # 词性标注
         # print '\t'.join(postags)
+        cnt = 0
+        for p in postags:
+            if words[cnt] not in corpus_gxx:
+                corpus_gxx[words[cnt]] = [p]
+            else:
+                corpus_gxx[words[cnt]].append(p)
+            cnt+=1
         for (index,tag) in enumerate(postags):
             if tag == 'a':
-                if postags[index-2] == 'n' and postags[index-1] == 'n':
+                if (index-2) > 0 and postags[index-2] == 'n' and postags[index-1] == 'n':
                     # n n a
                     adj = words[index]
                     nn = words[index-2] + words[index-1]
@@ -91,7 +105,7 @@ for each in comments:
                     adj = words[index]
                     nn = words[index-1]
                     print nn + " "  + adj
-                elif postags[index-2] == 'n' and postags[index-1] == 'd':
+                elif (index-2) > 0 and postags[index-2] == 'n' and postags[index-1] == 'd':
                     if postags[index-3] == 'j' or postags[index-3] == 'v' :
                         # n d a
                         adj = words[index]
@@ -106,36 +120,36 @@ for each in comments:
                         dd = words[index-1]
                         print nn + " " + dd + " " + adj
                         adj = dd + " " + adj
-                elif postags[index-3] == 'n' and postags[index-2] == 'd' and postags[index-1] == 'v':
-                    # n d v a
-                    adj = words[index]
-                    nn = words[index-3]
-                    dd = words[index-2]
-                    print nn + " " + dd + " " + adj
-                    adj = dd + " " + adj
-                elif postags[index-3] == 'n' and postags[index-2] == 'a' and postags[index-1] == 'd':
-                    # n a d a
-                    adj = words[index]
-                    nn = words[index-3]
-                    dd = words[index-1]
-                    print nn + " " + dd + " " + adj
-                    adj = dd + " " + adj
+                # elif postags[index-3] == 'n' and postags[index-2] == 'd' and postags[index-1] == 'v':
+                #     # n d v a
+                #     adj = words[index]
+                #     nn = words[index-3]
+                #     dd = words[index-2]
+                #     print nn + " " + dd + " " + adj
+                #     adj = dd + " " + adj
+                # elif postags[index-3] == 'n' and postags[index-2] == 'a' and postags[index-1] == 'd':
+                #     # n a d a
+                #     adj = words[index]
+                #     nn = words[index-3]
+                #     dd = words[index-1]
+                #     print nn + " " + dd + " " + adj
+                #     adj = dd + " " + adj
                 else:
                     continue
                 # 存的时候每个特征(np或vp)，存储d+adj（有些只含有adj），对应文档编号。
                 if nn in dict:
                     if adj in dict[nn]:
-                        dict[nn][adj].add(review_id)
+                        dict[nn][adj].append(review_id)
                     else:
-                        dict[nn][adj] = set()
-                        dict[nn][adj].add(review_id)
+                        dict[nn][adj] = list()
+                        dict[nn][adj].append(review_id)
                 else:
                     dict[nn] = {}
                     if adj in dict[nn]:
-                        dict[nn][adj].add(review_id)
+                        dict[nn][adj].append(review_id)
                     else:
-                        dict[nn][adj] = set()
-                        dict[nn][adj].add(review_id)
+                        dict[nn][adj] = list()
+                        dict[nn][adj].append(review_id)
         arcs = parser.parse(words, postags)
         # print "\t".join("%d:%s" % (arc.head, arc.relation) for arc in arcs)
     # for word, flag in words:
@@ -149,4 +163,19 @@ for each in comments:
 # hotCommentTag_list = getHotTag(jcontent)
 # for i in dict:
 #     print json.dumps(dict[i], encoding="UTF-8", ensure_ascii=False)
-print dict
+for feature in dict:
+    for adj in dict[feature]:
+        f_a = feature + " " +adj
+        # print dict[nn]
+        for num in dict[feature][adj]:
+            fff = str(num) + " " + f_a
+            output.write(fff)
+            output.write("\n")
+        # output.write(numString)
+        # output.write(dict[nn][adj])
+    # output.write("\n")
+
+fout_gxx = open('ltp_result.txt','w')
+fout_gxx.write(str(s_gxx))
+fout_gxx.write(str(corpus_gxx))
+fout_gxx.close()
