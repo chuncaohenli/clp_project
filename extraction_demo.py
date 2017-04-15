@@ -3,7 +3,7 @@
 import json
 import traceback
 import utils
-
+    
 from Item import *
 import sys, os
 from pyltp import SentenceSplitter, Segmentor, Postagger, Parser, NamedEntityRecognizer, SementicRoleLabeller
