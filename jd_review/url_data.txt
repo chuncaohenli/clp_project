@@ -1,0 +1,11 @@
+http://www.chuncaohenli.xyz/jd_data_0416.zip
+
+Download data through this link and put all the data here. Make sure the file structure will be like
+
+clp_project/
+            jd_review/
+                      review_xxxx/
+                      review_xxxx/
+                      review_xxxx/
+                      ....
+
