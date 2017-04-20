@@ -3,7 +3,7 @@
 import json
 import traceback
 import utils
-    
+
 from Item import *
 import sys, os
 from pyltp import SentenceSplitter, Segmentor, Postagger, Parser, NamedEntityRecognizer, SementicRoleLabeller
@@ -64,6 +64,7 @@ for i in range(4901):
 
 segmentor = Segmentor()
 segmentor.load(os.path.join(MODELDIR, "cws.model"))
+# segmentor.load_with_lexicon(os.path.join(MODELDIR, "cws.model"), 'vocabulary.txt') # 加载模型
 postagger = Postagger() # 初始化实例
 postagger.load(os.path.join(MODELDIR, "pos.model"))
 parser = Parser()
@@ -86,6 +87,18 @@ for each in comments:
         s_gxx.append(tmp)
         postags = postagger.postag(words)  # 词性标注
         # print '\t'.join(postags)
+        arcs = parser.parse(words, postags)
+        # print '\t'.join(arcs)
+        # print "\t".join("%d:%s" % (arc.head, arc.relation) for arc in arcs)
+
+        # this part works for parsing rule
+        # for (index,arc) in enumerate(arcs):
+        #     if arc.relation == 'SBV':
+        #         # print arc.head
+        #         if arcs[index+1] != None and arcs[index+1].relation == 'ADV' and postags[arc.head-1] == 'a':
+        #             sentence = "sentence" + words[index] + words[index+1] + words[arc.head-1]
+        #             # print sentence
+
         cnt = 0
         for p in postags:
             if words[cnt] not in corpus_gxx:
@@ -93,63 +106,70 @@ for each in comments:
             else:
                 corpus_gxx[words[cnt]].append(p)
             cnt+=1
+        # this part works for postagging rules
         for (index,tag) in enumerate(postags):
             if tag == 'a':
                 if (index-2) > 0 and postags[index-2] == 'n' and postags[index-1] == 'n':
                     # n n a
                     adj = words[index]
                     nn = words[index-2] + words[index-1]
-                    print nn + " "  + adj
+                    start = index-2
+                    # print nn + " " + adj
                 elif postags[index-1] == 'n':
-                    # n n a
+                    # n a
                     adj = words[index]
                     nn = words[index-1]
-                    print nn + " "  + adj
+                    start = index-1
+                    # print nn + " " + adj
                 elif (index-2) > 0 and postags[index-2] == 'n' and postags[index-1] == 'd':
                     if postags[index-3] == 'j' or postags[index-3] == 'v' :
-                        # n d a
+                        # j n d a
                         adj = words[index]
                         nn = words[index-3] + words[index-2]
                         dd = words[index-1]
-                        print nn + " " + dd + " " + adj
+                        # print nn + " " + dd + " " + adj
                         adj = dd + " " + adj
                     else:
                         # n d a
                         adj = words[index]
                         nn = words[index-2]
                         dd = words[index-1]
-                        print nn + " " + dd + " " + adj
+                        start = index-3
+                        # print nn + " " + dd + " " + adj
                         adj = dd + " " + adj
-                # elif postags[index-3] == 'n' and postags[index-2] == 'd' and postags[index-1] == 'v':
-                #     # n d v a
-                #     adj = words[index]
-                #     nn = words[index-3]
-                #     dd = words[index-2]
-                #     print nn + " " + dd + " " + adj
-                #     adj = dd + " " + adj
-                # elif postags[index-3] == 'n' and postags[index-2] == 'a' and postags[index-1] == 'd':
-                #     # n a d a
-                #     adj = words[index]
-                #     nn = words[index-3]
-                #     dd = words[index-1]
-                #     print nn + " " + dd + " " + adj
-                #     adj = dd + " " + adj
+                elif (index-2) > 0 and postags[index-3] == 'n' and postags[index-2] == 'd' and postags[index-1] == 'v':
+                    # n d v a
+                    adj = words[index]
+                    nn = words[index-3]
+                    dd = words[index-2]
+                    start = index-3
+                    # print nn + " " + dd + " " + adj
+                    adj = dd + " " + adj
+                elif (index-2) > 0 and postags[index-3] == 'n' and postags[index-2] == 'a' and postags[index-1] == 'd':
+                    # n a d a
+                    adj = words[index]
+                    nn = words[index-3]
+                    dd = words[index-1]
+                    start = index-3
+                    # print nn + " " + dd + " " + adj
+                    adj = dd + " " + adj
                 else:
                     continue
                 # 存的时候每个特征(np或vp)，存储d+adj（有些只含有adj），对应文档编号。
+                String = str(review_id) + "/" + str(start) + "/" + str(index)
                 if nn in dict:
                     if adj in dict[nn]:
-                        dict[nn][adj].append(review_id)
+                        dict[nn][adj].append(String)
                     else:
                         dict[nn][adj] = list()
-                        dict[nn][adj].append(review_id)
+                        dict[nn][adj].append(String)
                 else:
                     dict[nn] = {}
                     if adj in dict[nn]:
-                        dict[nn][adj].append(review_id)
+                        dict[nn][adj].append(String)
                     else:
                         dict[nn][adj] = list()
-                        dict[nn][adj].append(review_id)
+                        dict[nn][adj].append(String)
         arcs = parser.parse(words, postags)
         # print "\t".join("%d:%s" % (arc.head, arc.relation) for arc in arcs)
     # for word, flag in words:
