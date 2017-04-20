@@ -13,13 +13,22 @@ model = word2vec.Word2Vec.load('word2vec_model')
 #a =  model.most_similar([u'电池'])
 # for b in a:
 #     print b[0].encode('utf-8')
-f = open('corpus.txt','r')
-corpus = eval(f.readline().strip())
-word_vec = {}
 
+# f = open('corpus.txt','r')
+# corpus = eval(f.readline().strip())
+# word_vec = {}
+#
+# for k in corpus.keys():
+#     word_vec[k] = model.wv[k]
+corpus = {}
+f_ltp = open('ltp_result_corpus.txt','rb')
+for line in f_ltp:
+    ll = line.strip().split('\t')
+    corpus[ll[0]] = eval(ll[1])
+f_ltp.close()
+word_vec = {}
 for k in corpus.keys():
     word_vec[k] = model.wv[k]
-
 
 noun_corpus = set() # n nr ns nt nz
 noun_arr = []

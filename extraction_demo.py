@@ -8,7 +8,7 @@ from Item import *
 import sys, os
 from pyltp import SentenceSplitter, Segmentor, Postagger, Parser, NamedEntityRecognizer, SementicRoleLabeller
 
-ROOTDIR = 'F:\python proj\ltp-data-v3.3.1'
+ROOTDIR = 'D:\BaiduYunDownload\ltp-data-v3.3.1'
 sys.path = [os.path.join(ROOTDIR, "lib")] + sys.path
 
 # Set your own model path
@@ -50,17 +50,32 @@ def getHotTag(jcontent):
 dict = {}
 
 # comment_list = getComments(jcontent)
-
+id_list = ['1217500','1617039','3133817','3479663','4110748']
 comments = []
-path = './jd_review/review_3133817/3133817_'
-for i in range(4901):
-    try :
-        data = utils.readJD(path+str(i)+'.json','3133817')
-        comments.extend(data[0])
-        num_hottag = len(data[1])
-    except Exception:
-        traceback.print_exc()
-        continue
+for id in id_list:
+    path =(r'D:\jd_data_0416\data\review_'+id)
+    for parent, dirnames, filenames in os.walk(path):
+        for f in filenames:
+            f_path = path+'\\'+f
+            try:
+                data = utils.readJD(f_path,id)
+                comments.extend(data[0])
+                num_hottag = len(data[1])
+            except Exception:
+                traceback.print_exc()
+                print f_path
+                continue
+
+# comments = []
+# path = './jd_review/review_3133817/3133817_'
+# for i in range(4901):
+#     try :
+#         data = utils.readJD(path+str(i)+'.json','3133817')
+#         comments.extend(data[0])
+#         num_hottag = len(data[1])
+#     except Exception:
+#         traceback.print_exc()
+#         continue
 
 segmentor = Segmentor()
 segmentor.load(os.path.join(MODELDIR, "cws.model"))
@@ -89,9 +104,9 @@ for each in comments:
         cnt = 0
         for p in postags:
             if words[cnt] not in corpus_gxx:
-                corpus_gxx[words[cnt]] = [p]
+                corpus_gxx[words[cnt]] = set(p)
             else:
-                corpus_gxx[words[cnt]].append(p)
+                corpus_gxx[words[cnt]].add(p)
             cnt+=1
         for (index,tag) in enumerate(postags):
             if tag == 'a':
@@ -99,12 +114,12 @@ for each in comments:
                     # n n a
                     adj = words[index]
                     nn = words[index-2] + words[index-1]
-                    print nn + " "  + adj
+                    #print nn + " "  + adj
                 elif postags[index-1] == 'n':
                     # n n a
                     adj = words[index]
                     nn = words[index-1]
-                    print nn + " "  + adj
+                    #print nn + " "  + adj
                 elif (index-2) > 0 and postags[index-2] == 'n' and postags[index-1] == 'd':
                     if postags[index-3] == 'j' or postags[index-3] == 'v' :
                         # n d a
@@ -175,7 +190,11 @@ for feature in dict:
         # output.write(dict[nn][adj])
     # output.write("\n")
 
-fout_gxx = open('ltp_result.txt','w')
-fout_gxx.write(str(s_gxx))
-fout_gxx.write(str(corpus_gxx))
+fout_gxx = open('ltp_result_s.txt','w')
+for item in s_gxx:
+    fout_gxx.write(str(item)+'\n')
+fout_gxx.close()
+fout_gxx = open('ltp_result_corpus.txt','w')
+for k,v in corpus_gxx.iteritems():
+    fout_gxx.write(str(k)+'\t'+str(v)+'\n')
 fout_gxx.close()

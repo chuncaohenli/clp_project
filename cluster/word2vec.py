@@ -36,25 +36,39 @@ word_vec = {}
 #             corpus[word].append(flag)
 #     sentences.append(tmp)
 
+sentences = []
+corpus = {}
+f_ltp = open('ltp_result_s.txt','rb')
+for line in f_ltp:
+    row = eval(line.strip())
+    u_row = [unicode(k,'utf-8') for k in row]
+    sentences.append(eval(line.strip()))
+f_ltp.close()
+f_ltp = open('ltp_result_corpus.txt','rb')
+cnt = 0
 
+while 1:
+    line = f_ltp.readline()
+    if line =='':
+        break
+    ll = line.strip().split('\t')
+    corpus[ll[0]] = eval(ll[1])
+    cnt +=1
+print cnt
+f_ltp.close()
 
-f_ltp = open('ltp_result.txt','r')
-ll = f_ltp.readline().split('{')
-sentences = eval(ll[0])
-corpus = eval('{'+ll[1])
-tmp = {}
-for k in corpus.keys():
-    nk = unicode(k,'utf-8')
-    tmp[k] = corpus[k]
 
 # 构建模型
 model = word2vec.Word2Vec(sentences, min_count=1)
 model.save('word2vec_model')
 
-for k in corpus.keys():
-    word_vec[k] = model.wv[k]
-
-f = open('corpus.txt','w')
-f.write(str(tmp)+'\n')
-f.write(str(word_vec))
-f.close()
+# for k in corpus.keys():
+#     word_vec[k] = model.wv[k]
+# tmp = {}
+# for k in corpus.keys():
+#     nk = unicode(k,'utf-8')
+#     tmp[nk] = model.wv[k]
+# f = open('corpus.txt','w')
+# #f.write(str(tmp)+'\n')
+# f.write(str(tmp))
+# f.close()
