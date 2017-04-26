@@ -2,7 +2,7 @@ import json
 from Item import *
 
 # read json file
-fopen = open('jd_review/3133817_0.json','r')
+fopen = open(r'D:\jd_data_0416\data\review_3133817\3133817_0.json','r')
 content = fopen.readline()
 jcontent = json.loads(content)
 productID = '3133817'
