@@ -1,2 +1,4 @@
 # review data
 *.json
+# text file
+*.text
