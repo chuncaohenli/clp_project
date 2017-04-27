@@ -57,22 +57,20 @@ def getHotTag(jcontent):
 dict = {}
 
 #comment_list = getComments(jcontent)
-id_list = ['1217500','1617039','3133817','3479663','4110748']
-comments = []
-for id in id_list:
-    if id!='3133817':
-        continue
-    path =(r'D:\jd_data_0416\data\review_'+id)
-    for jsonid in range(200):
-        fname = path + r'\\' + id + '_' + str(jsonid) + '.json'
-        try:
-            data = utils.readJD(fname, id)
-            comments.extend(data[0])
-            num_hottag = len(data[1])
-        except Exception:
-            traceback.print_exc()
-            print fname
-            continue
+# id_list = ['1217500','1617039','3133817','3479663','4110748']
+# comments = []
+# for id in id_list:
+#     path =(r'D:\jd_data_0416\data\review_'+id)
+#     for jsonid in range(200):
+#         fname = path + r'\\' + id + '_' + str(jsonid) + '.json'
+#         try:
+#             data = utils.readJD(fname, id)
+#             comments.extend(data[0])
+#             num_hottag = len(data[1])
+#         except Exception:
+#             traceback.print_exc()
+#             print fname
+#             continue
     # for parent, dirnames, filenames in os.walk(path):
     #     cnt = 0
     #     for f in filenames:
@@ -85,17 +83,18 @@ for id in id_list:
     #             traceback.print_exc()
     #             print f_path
     #             continue
-# comments = []
-# f_wiki = open('D:\wiki.chs.txt','r')
-# cnt = 0
-# wiki_s = []
-# while cnt<10000:
-#     wiki_s.append(f_wiki.readline())
-#     cnt += 1
-#
-# for wiki in wiki_s:
-#     new_com = Comment(wiki,'time','wiki','wiki')
-#     comments.append(new_com)
+comments = []
+f_wiki = open('D:\wiki.chs.txt','r')
+cnt = 0
+wiki_s = []
+
+while cnt<100000:
+    wiki_s.append(f_wiki.readline())
+    cnt += 1
+
+for wiki in wiki_s:
+    new_com = Comment(wiki,'time','wiki','wiki')
+    comments.append(new_com)
 
 # comments = []
 # path = './jd_review/review_3133817/3133817_'
@@ -107,23 +106,23 @@ for id in id_list:
 #     except Exception:
 #         traceback.print_exc()
 #         continue
-d = {}
-for c in comments:
-    d[c.id] = c.content
+
+
 
 s_gxx = []
 corpus_gxx = {}
 cnt_each = 0
 for each in comments:
-    # print cnt_each,len(comments)
-    # cnt_each+=1
+    print cnt_each,len(comments)
+    cnt_each+=1
     # paragraph = each.content.encode('raw_unicode_escape')
     if each.id == 'wiki':
         paragraph = each.content
     else:
         paragraph =  each.content.encode('UTF-8')
     review_id = each.id
-    sentences = SentenceSplitter.split(paragraph)
+    # sentences = SentenceSplitter.split(paragraph)
+    sentences = paragraph.split(' ')
     for sentence in sentences:
         words = segmentor.segment(sentence)
         # print "\t".join(words)
@@ -243,11 +242,11 @@ for feature in dict:
         # output.write(dict[nn][adj])
     # output.write("\n")
 
-# fout_gxx = open('ltp_result_s.txt','a+')
-# for item in s_gxx:
-#     fout_gxx.write(str(item)+'\n')
-# fout_gxx.close()
-# fout_gxx = open('ltp_result_corpus.txt','a+')
-# for k,v in corpus_gxx.iteritems():
-#     fout_gxx.write(str(k)+'\t'+str(v)+'\n')
-# fout_gxx.close()
+fout_gxx = open('ltp_result_s.txt','a+')
+for item in s_gxx:
+    fout_gxx.write(str(item)+'\n')
+fout_gxx.close()
+fout_gxx = open('ltp_result_corpus.txt','a+')
+for k,v in corpus_gxx.iteritems():
+    fout_gxx.write(str(k)+'\t'+str(v)+'\n')
+fout_gxx.close()

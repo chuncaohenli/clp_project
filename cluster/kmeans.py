@@ -52,7 +52,7 @@ for ele in adj_corpus:
 for ele in adverb_corpus:
     adverb_arr.append(word_vec[ele])
 
-kmeans_noun = KMeans(n_clusters=20, random_state=0).fit(np.asarray(noun_arr))
+kmeans_noun = KMeans(n_clusters=40, random_state=0).fit(np.asarray(noun_arr))
 
 fcluster = open('noun_cluster.txt','w')
 i = 0
@@ -62,7 +62,7 @@ for ele in noun_corpus:
     i+=1
 fcluster.close()
 
-kmeans_adj = KMeans(n_clusters=10, random_state=0).fit(np.asarray(adj_arr))
+kmeans_adj = KMeans(n_clusters=5, random_state=0).fit(np.asarray(adj_arr))
 fcluster = open('adj_cluster.txt','w')
 i = 0
 for ele in adj_corpus:
